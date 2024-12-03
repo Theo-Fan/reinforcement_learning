@@ -86,5 +86,7 @@ if __name__ == "__main__":
     # test
     test_policy(env, policy_matrix)
 
+    print("Policy Matrix:", policy_matrix)
+
     env.add_policy(policy_matrix)
     env.render(animation_interval=10)
