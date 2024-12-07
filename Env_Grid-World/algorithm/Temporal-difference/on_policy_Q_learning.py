@@ -33,17 +33,22 @@ def train(env):
         pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
         action = epsilon_greedy_policy(pos, q_table, env.action_space)
         done = False
-        while not done:
+        # while not done:
+        for t in range(3000):
             next_state, reward, done, info = env.step(action)
             ne_pos = next_state[1] * env.env_size[0] + next_state[0]
             # next_action = epsilon_greedy_policy(ne_pos, q_table, env.action_space)
+            action_idx = env.action_space.index(action)
 
             q_ne_max = q_table[ne_pos][np.argmax(q_table[ne_pos])]
 
+
             # policy evaluation & improvement
-            q_table[pos][action] -= alpha * (q_table[pos][action] - (reward + gamma * q_ne_max))
+            q_table[pos][action_idx] -= alpha * (q_table[pos][action_idx] - (reward + gamma * q_ne_max))
 
             pos = ne_pos
+        if episode % 100 == 0:
+            print(f"Current Training episode: {episode}")
 
 def test(env):
     env.reset()
@@ -70,7 +75,7 @@ if __name__ == "__main__":
         num_states=num_state,
         num_actions=num_action
     )
-    # print(q_table)
+    print(q_table)
     train(env)
 
     test(env)
