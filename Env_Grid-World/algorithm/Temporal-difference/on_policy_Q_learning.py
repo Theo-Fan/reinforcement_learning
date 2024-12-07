@@ -2,7 +2,7 @@ import sys
 
 sys.path.append("../..")
 from src.grid_world import GridWorld
-
+import os
 import random
 import numpy as np
 
@@ -37,18 +37,26 @@ def train(env):
         for t in range(3000):
             next_state, reward, done, info = env.step(action)
             ne_pos = next_state[1] * env.env_size[0] + next_state[0]
-            # next_action = epsilon_greedy_policy(ne_pos, q_table, env.action_space)
+            next_action = epsilon_greedy_policy(ne_pos, q_table, env.action_space)
             action_idx = env.action_space.index(action)
 
             q_ne_max = q_table[ne_pos][np.argmax(q_table[ne_pos])]
 
+            # print(np.argmax(q_table[ne_pos]))
+            # print(f"Episode: {episode} q_ne_max: {q_ne_max}, q_table[pos]: {q_table[ne_pos]}")
+            # os._exit(0)
 
             # policy evaluation & improvement
-            q_table[pos][action_idx] -= alpha * (q_table[pos][action_idx] - (reward + gamma * q_ne_max))
+            q_table[pos][action_idx] -= alpha * (
+                    q_table[pos][action_idx] -
+                    (reward + gamma * q_ne_max)
+            )
 
             pos = ne_pos
+            action = next_action
         if episode % 100 == 0:
             print(f"Current Training episode: {episode}")
+
 
 def test(env):
     env.reset()
@@ -66,7 +74,6 @@ def test(env):
             break
 
 
-
 if __name__ == "__main__":
     env = GridWorld()
     num_state = env.num_states
@@ -75,24 +82,13 @@ if __name__ == "__main__":
         num_states=num_state,
         num_actions=num_action
     )
-    print(q_table)
+
+    print("Init Q-table: \n",q_table)
+
     train(env)
 
     test(env)
 
     env.add_policy(q_table)
 
-    # Add policy
-    # policy_matrix=np.random.rand(env.num_states,len(env.action_space))
-    # policy_matrix /= policy_matrix.sum(axis=1)[:, np.newaxis]  # make the sum of elements in each row to be 1
-
-    # print(type(policy_matrix))
-    # print(policy_matrix)
-    # env.add_policy(policy_matrix)
-
-    # Add state values
-    # values = np.random.uniform(0,10,(env.num_states,))
-    # env.add_state_values(values)
-
-    # Render the environment
     env.render(animation_interval=10)
