@@ -162,6 +162,7 @@ cython_debug/
 *.xlsx
 
 data/
+img/
 
 *.png
 
