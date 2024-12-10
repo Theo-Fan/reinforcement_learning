@@ -173,3 +173,6 @@ img/
 logs/
 checkpoint/
 
+
+# Sublime
+*.py:tests
