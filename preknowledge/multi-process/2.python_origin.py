@@ -24,29 +24,42 @@ params:
 """
 
 if __name__ == '__main__':
-    print("father processing starting")
+    print("father process starting")
     for i in range(5):
         p1 = Process(target=sub_process1, args=('theo',))
         
-        p2 = Process(target=sub_process2, args=("aaaa",))
+        p2 = Process(target=sub_process2, args=("aaaa",)) # 子进程执行 target 传入的方法
+        
+        # p1 = Process()
+        # p2 = Process() # 没有指定 target 方法则调用父进程的 run 函数（继承）
         
         p1.start()
         p2.start()
         
-        print(f"{p1.name} is running {p1.is_alive()}")
-        print(f"{p2.name} is running {p2.is_alive()}")
+        # print(f"{p1.name} is running {p1.is_alive()}") # is_alive() 判断该进程是否还在运行
+        # print(f"{p2.name} is running {p2.is_alive()}")
         
         print(p1.name, " pid: ", p1.pid)
         print(p2.name, " pid: ", p2.pid)
         
-        p1.join() # 主进程要等 p1 执行结束，阻塞主进程
+
+        
+        # print(f"{p1.name} is running {p1.is_alive()}") 
+        # print(f"{p2.name} is running {p2.is_alive()}")
+        
+        
+        p1.terminate() # 强制终止进程
+        
+        
+        # p1.join() # 主进程要等 p1 执行结束，阻塞主进程
         p2.join()
         
-        print(f"{p1.name} is running {p1.is_alive()}")
-        print(f"{p2.name} is running {p2.is_alive()}")
         
         print()
         print()
+        
+    
+    print("father process finished")
         
         
         

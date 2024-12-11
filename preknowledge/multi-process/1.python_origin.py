@@ -2,11 +2,11 @@ from multiprocessing import Process
 import os, time
 
 def test():
-    print(f"subprocessing id : {os.getpid()}, father processing id: {os.getppid()}")
+    print(f"subprocess id : {os.getpid()}, father process id: {os.getppid()}")
     time.sleep(1)
 
 if __name__ == '__main__':
-    print("start father processing")
+    print("start father process")
     lst = []
     
     for i in range(5):
@@ -17,4 +17,4 @@ if __name__ == '__main__':
     for i in lst: # 该语句用于阻塞父进程，不添加则print会先执行
         i.join()
     
-    print("father processing finished")
+    print("father process finished")
