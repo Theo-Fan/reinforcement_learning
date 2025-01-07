@@ -10,13 +10,13 @@ from numpy import mean
 
 # 定义策略网络
 class PolicyNetwork(Module):
-    def __init__(self, state_dim, hidden_dim, action_card):
+    def __init__(self, state_dim, hidden_dim, action_dim):
         super(PolicyNetwork, self).__init__()
         self.model = Sequential(
             Linear(state_dim, hidden_dim),
             ReLU(),
-            Linear(hidden_dim, action_card),
-            Softmax(dim=0)  # 将输出转换为概率分布
+            Linear(hidden_dim, action_dim),
+            Softmax()  # 将输出转换为概率分布
         )
 
     def forward(self, x):
@@ -24,15 +24,14 @@ class PolicyNetwork(Module):
 
 
 class REINFORCE:
-    def __init__(self, state_dim, hidden_dim, action_card, lr, gamma, device):
+    def __init__(self, state_dim, hidden_dim, action_dim, lr, gamma, device):
         self.state_dim = state_dim
         self.hidden_dim = hidden_dim
-        self.action_card = action_card
+        self.action_dim = action_dim
         self.gamma = gamma
         self.device = device
 
-        self.policy_net = PolicyNetwork(self.state_dim, self.hidden_dim, self.action_card).to(self.device)
-
+        self.policy_net = PolicyNetwork(self.state_dim, self.hidden_dim, self.action_dim).to(self.device)
         self.optimizer = Adam(self.policy_net.parameters(), lr=lr)
 
     # 根据当前状态选择动作
@@ -47,8 +46,8 @@ class REINFORCE:
         self.optimizer.zero_grad()  # 梯度清零
 
         for state, action, next_state, reward, done in reversed(transitions):  # 因为最后一个元素为最近时间的，因此需要对轨迹进行反转
-            G = self.gamma * G + reward  # 马尔可夫奖励过程
-            # 下述 Loss Function 为 REINFORCE 核心部分，由于要最大化 policy_net，反向传播只能最小化 loss, 因此加上 负号
+            G = self.gamma * G + reward  # value update【Monto-Carlo approximate】
+            # 由于要最大化 policy_net，反向传播只能最小化 loss, 因此加上 负号
             loss = -log(self.policy_net(state)[action]) * G
             loss.backward() # 反向传播
 
@@ -68,13 +67,13 @@ if __name__ == "__main__":
 
     # 获取状态和动作空间的维度
     state_dim = env.observation_space.shape[0]
-    action_card = env.action_space.n
+    action_dim = env.action_space.n
 
     # 创建REINFORCE算法的agent
     agent = REINFORCE(
         state_dim,
         hidden_dim,
-        action_card,
+        action_dim,
         lr,
         gamma,
         device
@@ -82,7 +81,7 @@ if __name__ == "__main__":
 
     # 开始训练
     for i in range(num_episodes):
-        transitions = []  # 存储一个episode中的状态、动作、回报序列
+        transitions = []  # 采集一个 episode
         episode_return = 0  # 记录当前episode的总回报
         state = env.reset()[0]  # 初始化环境并获取初始状态
 
