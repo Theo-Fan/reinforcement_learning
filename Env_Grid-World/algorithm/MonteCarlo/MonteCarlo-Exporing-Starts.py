@@ -20,8 +20,9 @@ def mc_exploring_starts(env, gamma, num_episodes=500):
     num_actions = len(env.action_space)
 
     policy = init_random_policy(num_states, num_actions)
+    print("Init Optimal Policy:")
+    print(policy)
 
-    q_table = np.zeros((num_states, num_actions))  # Q-values for (state, action)
     returns_count = np.zeros((num_states, num_actions))  # Count of returns for each (state, action)
     returns_sum = np.zeros((num_states, num_actions))  # Sum of returns for each (state, action)
 
@@ -61,20 +62,20 @@ def mc_exploring_starts(env, gamma, num_episodes=500):
                 returns_sum[state, action_idx] += g
                 returns_count[state, action_idx] += 1
 
-                q_table[state, action_idx] = returns_sum[state, action_idx] / returns_count[state, action_idx]
+                policy[state, action_idx] = returns_sum[state, action_idx] / returns_count[state, action_idx]
 
                 # Policy improvement: Make the policy greedy w.r.t. Q
-                best_action_idx = np.argmax(q_table[state])
+                best_action_idx = np.argmax(policy[state])
                 policy[state] = np.zeros(num_actions)
                 policy[state, best_action_idx] = 1  # Update to greedy policy
 
-    return policy, q_table
+    return policy
 
 
 if __name__ == "__main__":
     env = GridWorld()
 
-    optimal_policy, q_table = mc_exploring_starts(env, gamma, num_episodes=500)
+    optimal_policy = mc_exploring_starts(env, gamma, num_episodes=500)
 
     print("Optimal Policy:")
     print(optimal_policy)
