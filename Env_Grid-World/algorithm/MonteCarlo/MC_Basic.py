@@ -24,7 +24,8 @@ def monte_carlo_policy_iteration(env, policy_matrix, q_table, num_iterations=100
                 cnt = 1
 
                 # take trajectory
-                for _ in range(trajectory_length):
+                # 说明：此处对于每个状态只有一个固定的策略，因此多个trajectory的均值和单个trajectory相同，因此无需多次采样
+                for _ in range(trajectory_length): # trajectory_length 需要设置的长一些，以保证能访问到 target area
                     pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
                     if cnt == 1:
                         next_state, reward, done, info = env.step(action)
@@ -38,8 +39,7 @@ def monte_carlo_policy_iteration(env, policy_matrix, q_table, num_iterations=100
                     if done:
                         break
 
-
-                for item in reward_trace: # reverse reward
+                for item in reversed(reward_trace):  # reverse reward
                     q_table[s, idx] = item + gamma * q_table[s, idx]
 
             # Policy Improvement
@@ -62,7 +62,6 @@ if __name__ == "__main__":
     policy_matrix = monte_carlo_policy_iteration(env, policy_matrix, q_table)
 
     print(f"Policy Matrix: {policy_matrix}, Shape: {policy_matrix.shape}")
-
 
     state = env.reset()
     for t in range(100):
