@@ -1,0 +1,4 @@
+db:
+  driver: mysql
+  user: hello
+  password: 123456
