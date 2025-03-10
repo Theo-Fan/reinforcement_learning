@@ -1,6 +1,8 @@
+"""
+    A model-free variant of policy iteration
+"""
 import sys
 import numpy as np
-from collections import defaultdict
 
 sys.path.append("../..")
 from src.grid_world import GridWorld
