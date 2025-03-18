@@ -7,7 +7,28 @@ import numpy as np
 
 gamma = 0.9
 
-if __name__ == "__main__":
+def evaluate(env, policy_matrix, v):
+    state = env.reset()
+
+    for t in range(1000):
+        env.render(animation_interval=0.5)  # the figure will stop for 1 seconds
+        state = env.agent_state
+        pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
+        action = env.action_space[np.argmax(policy_matrix[pos])]
+
+        next_state, reward, done, info = env.step(action)
+        print(f"Step: {t}, Action: {action}, Cur-state: {state}, Re-pos:{pos}, "
+              f"Idx:{np.argmax(policy_matrix[pos])}, Next-state: {next_state}, Reward: {reward}, Done: {done}")
+        if done:
+            break
+
+    env.add_policy(policy_matrix)
+
+    env.add_state_values(v)
+
+    env.render(animation_interval=10)  # finally render 10 interval
+
+def main():
     env = GridWorld()
     # reset: ((0, 0), {})
     # action_space: [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] down, right, up, left, stay
@@ -17,6 +38,7 @@ if __name__ == "__main__":
     policy_matrix = np.zeros((env.num_states, len(env.action_space)))
 
     for t in range(1000):
+
         for s in range(env.num_states):
             for idx, a in enumerate(env.action_space):
                 init_state = env.set_state((s % env.env_size[1], s // env.env_size[1]))  # up -> down, left -> right
@@ -37,22 +59,12 @@ if __name__ == "__main__":
     print(f"Value vector: {v}, Shape:{v.shape}")
     print(f"Policy Matrix: {policy_matrix}, Shape: {policy_matrix.shape}")
 
-    state = env.reset()
+    # 验证
+    evaluate(env, policy_matrix, v)
 
-    for t in range(1000):
-        env.render(animation_interval=0.5)  # the figure will stop for 1 seconds
-        state = env.agent_state
-        pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
-        action = env.action_space[np.argmax(policy_matrix[pos])]
 
-        next_state, reward, done, info = env.step(action)
-        print(
-            f"Step: {t}, Action: {action}, Cur-state: {state}, Re-pos:{pos}, Idx:{np.argmax(policy_matrix[pos])}, Next-state: {next_state}, Reward: {reward}, Done: {done}")
-        if done:
-            break
 
-    env.add_policy(policy_matrix)
 
-    env.add_state_values(v)
 
-    env.render(animation_interval=10)  # finally render 10 interval
+if __name__ == "__main__":
+    main()

@@ -16,8 +16,30 @@ def init_random_determinatal_policy(num_states, num_actions):
 
     return matrix
 
+def evaluate(env, policy_matrix, v):
+    state = env.reset()
 
-if __name__ == "__main__":
+    for t in range(1000):
+        env.render(animation_interval=0.5)  # the figure will stop for 1 seconds
+
+        pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
+        action = env.action_space[np.argmax(policy_matrix[pos])]
+
+        next_state, reward, done, info = env.step(action)
+        print(
+            f"Step: {t}, Action: {action}, Cur-state: {env.agent_state}, Re-pos:{pos}, "
+            f"Next-state: {next_state}, Reward: {reward}, Done: {done}")
+        if done:
+            break
+
+    env.add_policy(policy_matrix)
+
+    env.add_state_values(v)
+
+    env.render(animation_interval=10)  # finally render 10 interval
+
+
+def main():
     env = GridWorld()
     # reset: ((0, 0), {})
     # action_space: [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] down, right, up, left, stay
@@ -45,6 +67,7 @@ if __name__ == "__main__":
 
                 v[c_s] = reward + gamma * v[n_s]
 
+
         # Policy Improvement
         for s in range(env.num_states):
             for idx, a in enumerate(env.action_space):
@@ -61,22 +84,9 @@ if __name__ == "__main__":
 
     print(f"Policy Matrix: {policy_matrix}, Shape: {policy_matrix.shape}")
 
-    state = env.reset()
+    evaluate(env, policy_matrix, v)
 
-    for t in range(1000):
-        env.render(animation_interval=0.5)  # the figure will stop for 1 seconds
 
-        pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
-        action = env.action_space[np.argmax(policy_matrix[pos])]
 
-        next_state, reward, done, info = env.step(action)
-        print(
-            f"Step: {t}, Action: {action}, Cur-state: {env.agent_state}, Re-pos:{pos}, Next-state: {next_state}, Reward: {reward}, Done: {done}")
-        if done:
-            break
-
-    env.add_policy(policy_matrix)
-
-    env.add_state_values(v)
-
-    env.render(animation_interval=10)  # finally render 10 interval
+if __name__ == "__main__":
+    main()

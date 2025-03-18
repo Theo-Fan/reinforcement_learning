@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 
 from config_DQN import *
 
-
 class ReplayBuffer:
     def __init__(self, capacity):
         self.buffer = collections.deque(maxlen=capacity)  # 创建一个固定大小的队列来存储经验，FIFO 方式

@@ -14,7 +14,7 @@ def init_random_deterministic_policy(num_states, num_actions):
     return matrix
 
 
-def monte_carlo_policy_iteration(env, policy_matrix, q_table, num_iterations=100, trajectory_length=100):
+def monte_carlo_policy_iteration(env, policy_matrix, q_table, num_iterations=300, trajectory_length=100):
     for t in range(num_iterations):
         for s in range(env.num_states):
             for idx, action in enumerate(env.action_space):
@@ -50,19 +50,7 @@ def monte_carlo_policy_iteration(env, policy_matrix, q_table, num_iterations=100
     return policy_matrix
 
 
-if __name__ == "__main__":
-    # reset: ((0, 0), {})
-    # action_space: [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] down, right, up, left, stay
-    # num_states: 25
-
-    env = GridWorld()
-    q_table = np.zeros((env.num_states, len(env.action_space)))
-    policy_matrix = init_random_deterministic_policy(env.num_states, len(env.action_space))
-
-    policy_matrix = monte_carlo_policy_iteration(env, policy_matrix, q_table)
-
-    print(f"Policy Matrix: {policy_matrix}, Shape: {policy_matrix.shape}")
-
+def evaluate(env, policy_matrix):
     state = env.reset()
     for t in range(100):
         env.render(animation_interval=0.5)
@@ -79,3 +67,23 @@ if __name__ == "__main__":
 
     env.add_policy(policy_matrix)
     env.render(animation_interval=10)
+
+
+def main():
+    env = GridWorld()
+    q_table = np.zeros((env.num_states, len(env.action_space)))
+    policy_matrix = init_random_deterministic_policy(env.num_states, len(env.action_space))
+
+    policy_matrix = monte_carlo_policy_iteration(env, policy_matrix, q_table)
+
+    print(f"Policy Matrix: {policy_matrix}, Shape: {policy_matrix.shape}")
+
+    evaluate(env, policy_matrix)
+
+
+if __name__ == "__main__":
+    # reset: ((0, 0), {})
+    # action_space: [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] down, right, up, left, stay
+    # num_states: 25
+
+    main()
