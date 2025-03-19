@@ -146,12 +146,24 @@ class GridWorld():
                 if action_probability != 0:
                     dx, dy = self.action_space[i]
                     if (dx, dy) != (0, 0):
-                        self.ax.add_patch(patches.FancyArrow(x, y, dx=(0.1 + action_probability / 2) * dx,
-                                                             dy=(0.1 + action_probability / 2) * dy,
-                                                             color=self.color_policy, width=0.001, head_width=0.05))
+                        self.ax.add_patch(patches.FancyArrow(
+                            x,
+                            y,
+                            dx=(0.1 + action_probability / 4) * dx,
+                            dy=(0.1 + action_probability / 4) * dy,
+                            color=self.color_policy,
+                            width=0.001,
+                            head_width=0.05
+                        ))
                     else:
-                        self.ax.add_patch(patches.Circle((x, y), radius=0.07, facecolor=self.color_policy,
-                                                         edgecolor=self.color_policy, linewidth=1, fill=False))
+                        self.ax.add_patch(patches.Circle(
+                            (x, y),
+                            radius=0.01,
+                            facecolor=self.color_policy,
+                            edgecolor=self.color_policy,
+                            linewidth=1,
+                            fill=False
+                        ))
 
     def add_state_values(self, values, precision=1):
         '''
