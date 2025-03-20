@@ -9,7 +9,7 @@ config = (  # 1. Configure the algorithm,
     .evaluation(evaluation_num_workers=1)
 )
 
-algo = config.build()  # 2. build the algorithm,
+algo = config.build()  # 2. build the algorithm (Trainer)
 
 for _ in range(5):
     print(algo.train())  # 3. train it,

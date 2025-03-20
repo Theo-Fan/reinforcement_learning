@@ -1,0 +1,89 @@
+---
+common:
+  android-firebase: &android-firebase
+    name: "Android Firebase Cloud Messaging"
+    bazel: 7.2.0rc1
+    working_directory: ../android/firebase-cloud-messaging
+    build_targets:
+      - "//app:app"
+    skip_in_bazel_downstream_pipeline: "https://github.com/bazelbuild/examples/issues/487"
+  android-ndk: &android-ndk
+    name: "Android NDK"
+    working_directory: ../android/ndk
+    build_flags:
+      - "--android_platforms=//:arm64-v8a,//:x86"
+      - "--enable_bzlmod"
+    build_targets:
+      - "//app/src/main:app"
+    skip_in_bazel_downstream_pipeline: "https://github.com/bazelbuild/examples/issues/501"
+  android-jetpack: &android-jetpack
+    name: "Android Jetpack Compose"
+    # Cannot upgrade this until rules_kotlin is compatible.
+    bazel: 6.3.2
+    working_directory: ../android/jetpack-compose
+    build_flags:
+      - "--android_platforms=//:arm64-v8a"
+      - "--remote_download_outputs=all"
+      - "--enable_bzlmod"
+    build_targets:
+      - "//app/src/main:app"
+    skip_in_bazel_downstream_pipeline: "Due to https://github.com/bazelbuild/examples/issues/400"
+  android-robolectric: &android-robolectric
+    name: "Android Robolectric Testing"
+    # Cannot upgrade this until rules_kotlin is compatible.
+    bazel: 6.3.2
+    working_directory: ../android/robolectric-testing
+    test_flags:
+      - "--android_platforms=//:arm64-v8a"
+      - "--enable_bzlmod"
+    test_targets:
+      - "//app:test"
+    skip_in_bazel_downstream_pipeline: "Due to https://github.com/bazelbuild/examples/issues/400"
+
+tasks:
+  android-firebase-linux:
+    platform: ubuntu1804
+    <<: *android-firebase
+  android-firebase-macos:
+    platform: macos
+    <<: *android-firebase
+  # rules_android doesn't support windows yet.
+  # https://github.com/bazelbuild/rules_android/issues/72
+  # android-firebase-windows:
+  #   platform: windows
+  #   <<: *android-firebase
+  android-ndk-linux:
+    platform: ubuntu1804
+    environment:
+      ANDROID_NDK_HOME: /opt/android-ndk-r25b
+    <<: *android-ndk
+  android-ndk-macos:
+    platform: macos_arm64
+    environment:
+      ANDROID_NDK_HOME: /Users/buildkite/android-ndk-r25b
+    <<: *android-ndk
+  # NDK project is not building on Windows yet.
+  # https://github.com/bazelbuild/examples/issues/94
+  # android-ndk-windows:
+  #   platform: windows
+  #   <<: *android-ndk
+  android-jetpack-compose-linux:
+    platform: ubuntu1804
+    <<: *android-jetpack
+  android-jetpack-compose-macos:
+    platform: macos
+    <<: *android-jetpack
+  android-jetpack-compose-windows:
+    platform: windows
+    <<: *android-jetpack
+  android-robolectric-testing-linux:
+    platform: ubuntu1804
+    <<: *android-robolectric
+  android-robolectric-testing-macos:
+    platform: macos
+    environment:
+      JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home
+    <<: *android-robolectric
+  #  android-robolectric-testing-windows:
+  #    platform: windows
+  #    <<: *android-robolectric

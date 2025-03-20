@@ -1,0 +1,117 @@
+module(
+    name = "oci-container",
+    version = "0.0.0",
+)
+
+###############################################################################
+# Bazel Dependencies
+# https://registry.bazel.build/
+###############################################################################
+bazel_dep(name = "rules_rust", version = "0.57.1")
+bazel_dep(name = "rules_oci", version = "2.2.1")
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "toolchains_llvm", version = "1.2.0", dev_dependency = True)
+
+###############################################################################
+# Small (clang) LLVM toolchain
+# https://github.com/dzbarsky/static-clang
+###############################################################################
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = "18.1.8",
+    sha256 = {
+        # Generate checksums with shasum -a 256 filename.tar.zst
+        "darwin-aarch64": "41d8dea52d18c4e8b90c4fcd31965f9f297df9f40a38a33d60748dbe7f8330b8",
+        "darwin-x86_64": "",
+        "linux-aarch64": "",
+        "linux-x86_64": "",
+    },
+    stdlib = {
+        "linux-x86_64": "stdc++",
+        "linux-aarch64": "stdc++",
+    },
+    urls = {
+        "darwin-aarch64": ["https://github.com/MaterializeInc/toolchains/releases/download/clang-18.1.8-4/darwin_aarch64.tar.zst"],
+        "darwin-x86_64": ["https://github.com/MaterializeInc/toolchains/releases/download/clang-18.1.8-4/darwin_x86_64.tar.zst"],
+        "linux-aarch64": ["https://github.com/MaterializeInc/toolchains/releases/download/clang-18.1.8-4/linux_aarch64.tar.zst"],
+        "linux-x86_64": ["https://github.com/MaterializeInc/toolchains/releases/download/clang-18.1.8-4/linux_x86_64.tar.zst"],
+    },
+)
+
+###############################################################################
+# Rust toolchain
+# https://github.com/bazelbuild/rules_rust/releases
+###############################################################################
+RUST_EDITION = "2021"  # NOTE: 2024 edition will be released with Rust 1.85.0
+
+RUST_VERSION = "1.84.0"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [RUST_VERSION],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+# OCI Container
+##################
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# https://github.com/GoogleContainerTools/distroless
+oci.pull(
+    name = "distroless",
+    digest = "sha256:e1065a1d58800a7294f74e67c32ec4146d09d6cbe471c1fa7ed456b2d2bf06e0",
+    image = "gcr.io/distroless/cc-debian12",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
+)
+use_repo(
+    oci,
+    "distroless",
+    "distroless_linux_amd64",
+    "distroless_linux_arm64_v8",
+)
+
+
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+
+# External crates
+crate.spec(
+    package = "arc-swap",
+    version = "1.7",
+)
+crate.spec(
+    features = ["derive"],
+    package = "serde",
+    version = "1.0",
+)
+crate.spec(
+    package = "serde_json",
+    version = "1.0",
+)
+crate.spec(
+    default_features = False,
+    features = [
+        "macros",
+        "net",
+        "rt-multi-thread",
+        "signal",
+    ],
+    package = "tokio",
+    version = "1.40",
+)
+crate.spec(
+    features = ["signal"],
+    package = "tokio-cron-scheduler",
+    version = "0.10",
+)
+crate.spec(
+    package = "warp",
+    version = "0.3",
+)
+crate.from_specs()
+use_repo(crate, "crates")
