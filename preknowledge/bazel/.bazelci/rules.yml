@@ -1,0 +1,72 @@
+#
+# Bazel releases
+#
+lts: &lts
+  bazel: latest
+
+rolling: &rolling
+  bazel: rolling
+
+#
+# Commmon features by platform
+#
+linux: &linux
+  platform: ubuntu2204
+
+macos: &macos
+  platform: macos_arm64
+
+windows: &windows
+  platform: windows
+
+#
+# Test sets
+#
+basics: &basics
+  working_directory: ../rules
+  build_targets:
+  - "..."
+  test_targets:
+  - "..."
+
+#
+# Finally, the cross product of tests X platforms X bazel release
+#
+tasks:
+  basics_linux_lts:
+    name: basics_linux_lts
+    <<: *linux
+    <<: *lts
+    <<: *basics
+  basics_linux_latest:
+    name: basics_linux_latest
+    <<: *linux
+    <<: *rolling
+    <<: *basics
+  basics_macos_lts:
+    name: basics_macos_lts
+    <<: *macos
+    <<: *lts
+    <<: *basics
+  basics_macos_latest:
+    name: basics_macos_latest
+    <<: *macos
+    <<: *basics
+  basics_windows_lts:
+    name: basics_windows_lts
+    <<: *windows
+    <<: *lts
+    working_directory: ../rules
+    build_targets:
+    - "..."
+    # TODO(bazel-team): Make runfiles examples work on Windows.
+    - "-//runfiles/..."
+  basics_windows_latest:
+    name: basics_windows_latest
+    <<: *windows
+    <<: *rolling
+    working_directory: ../rules
+    build_targets:
+    - "..."
+    # TODO(bazel-team): Make runfiles examples work on Windows.
+    - "-//runfiles/..."

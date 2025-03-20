@@ -1,0 +1,77 @@
+# FIXME(alexeagle): move to bzlmod
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+RULES_JVM_EXTERNAL_TAG = "5.3"
+
+RULES_JVM_EXTERNAL_SHA = "d31e369b854322ca5098ea12c69d7175ded971435e55c18dd9dd5f29cc5249ac"
+
+http_archive(
+    name = "rules_jvm_external",
+    sha256 = RULES_JVM_EXTERNAL_SHA,
+    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
+    url =
+    "https://github.com/bazelbuild/rules_jvm_external/releases/download/%s/rules_jvm_external-%s.tar.gz" % (RULES_JVM_EXTERNAL_TAG, RULES_JVM_EXTERNAL_TAG)
+)
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+maven_install(
+    artifacts = [
+        "com.google.firebase:firebase-messaging:17.0.0",
+        "com.android.support:appcompat-v7:26.1.0",
+        "com.android.support.constraint:constraint-layout:1.0.2",
+        "com.google.code.gson:gson:2.8.2",
+    ],
+    # See https://github.com/bazelbuild/rules_jvm_external/#repository-aliases
+    # This can be removed if none of your external dependencies uses `maven_jar`.
+    generate_compat_repositories = True,
+    repositories = [
+        "https://jcenter.bintray.com",
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+    version_conflict_policy = "pinned",
+    use_starlark_android_rules = True,
+    aar_import_bzl_label = "@rules_android//rules:rules.bzl",
+)
+
+load("@maven//:compat.bzl", "compat_repositories")
+
+compat_repositories()
+
+TOOLS_ANDROID_COMMIT = "0e864ba5a86958513658250de587416d8e17c481"
+
+http_archive(
+    name = "tools_android",
+    repo_mapping = {
+        "@com_google_code_gson_2_8_2": "@com_google_code_gson_gson",
+    },
+    sha256 = "57c50d6331ba578fc8adfcede20ef12b437cb4cc2edf60c852e4b834eefee5fc",
+    strip_prefix = "tools_android-" + TOOLS_ANDROID_COMMIT,
+    url = "https://github.com/bazelbuild/tools_android/archive/%s.tar.gz" % TOOLS_ANDROID_COMMIT,
+)
+
+RULES_ANDROID_COMMIT = "93e27030d3f0defa39cbbc35195638cb772b0c27"
+
+http_archive(
+    name = "rules_android",
+    sha256 = "71cae2413868a24f17d43fd595af6f3905d2e5b3235f76514f54800bfd90c903",
+    strip_prefix = "rules_android-" + RULES_ANDROID_COMMIT,
+    urls = ["https://github.com/bazelbuild/rules_android/archive/%s.zip" % RULES_ANDROID_COMMIT],
+)
+
+load("@rules_android//:prereqs.bzl", "rules_android_prereqs")
+rules_android_prereqs()
+load("@rules_android//:defs.bzl", "rules_android_workspace")
+rules_android_workspace()
+
+load("@rules_android//rules:rules.bzl", "android_sdk_repository")
+# Requires that the ANDROID_HOME environment variable is set to the Android SDK path.
+android_sdk_repository(
+    name = "androidsdk",
+)
+
+register_toolchains(
+    "@rules_android//toolchains/android:android_default_toolchain",
+    "@rules_android//toolchains/android_sdk:android_sdk_tools",
+)
