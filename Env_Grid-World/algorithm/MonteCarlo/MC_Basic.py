@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.append("../..")
-from src.grid_world import GridWorld
+from env.grid_world import GridWorld
 
 gamma = 0.9
 

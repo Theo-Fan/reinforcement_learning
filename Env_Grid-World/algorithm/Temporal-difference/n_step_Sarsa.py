@@ -3,10 +3,10 @@ import sys
 import numpy as np
 
 sys.path.append("../..")
-from src.grid_world import GridWorld
+from env.grid_world import GridWorld
 
 gamma = 0.9
-num_episode = 1000
+num_episode = 2000
 alpha = 0.1
 epsilon = 0.1
 n = 5  # n-step SARSA 的 n 值
@@ -28,7 +28,7 @@ def epsilon_greedy(state, policy, epsilon, action_space):
 
 def compute_n_step_return(reward_queue, gamma, n, q_table, last_state, last_action):
     """
-    计算 n-step 回报
+    calc n-step Return
     G_t^(n) = R_t+1 + γR_t+2 + ... + γ^(n-1)R_t+n + γ^nQ(S_t+n, A_t+n)
     """
     G = 0
@@ -44,19 +44,21 @@ def train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n):
     for episode in range(num_episode):
         env.reset()
 
-        # 初始化滑动窗口
-        state_queue = []  # 最近 n 步的状态
-        action_queue = []  # 最近 n 步的动作
-        reward_queue = []  # 最近 n 步的奖励
+        # init n-step windows
+        state_queue = []  # n-step state
+        action_queue = []
+        reward_queue = []
 
         pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
         action = epsilon_greedy(pos, q_table, epsilon, env.action_space)
 
+        # add first state and action to n-step windows, now we don't have reward
         state_queue.append(pos)
         action_queue.append(env.action_space.index(action))
 
-        for t in range(1000):
+        for t in range(100):
             next_state, reward, done, info = env.step(action)
+
             ne_pos = next_state[1] * env.env_size[0] + next_state[0]
             next_action = epsilon_greedy(ne_pos, q_table, epsilon, env.action_space)
 
@@ -64,21 +66,16 @@ def train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n):
             state_queue.append(ne_pos)
             action_queue.append(env.action_space.index(next_action))
 
-            # 窗口满了，计算 n-step 回报
-            if len(reward_queue) > n:
+            # window full，calc n-step Return
+            if len(reward_queue) >= n:
                 G = compute_n_step_return(
                     reward_queue, gamma, n, q_table, state_queue[-1], action_queue[-1]
                 )
 
                 # 更新 Q 值
                 q_table[state_queue[0]][action_queue[0]] -= alpha * (
-                    q_table[state_queue[0]][action_queue[0]] - G
+                        q_table[state_queue[0]][action_queue[0]] - G
                 )
-
-                # 更新策略矩阵
-                # best_action = np.argmax(q_table[state_queue[0]])
-                # policy_matrix[state_queue[0]] = epsilon / len(env.action_space)
-                # policy_matrix[state_queue[0]][best_action] += 1 - epsilon
 
                 # 移除窗口最早的元素
                 reward_queue.pop(0)
@@ -87,22 +84,17 @@ def train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n):
 
             # 更新动作和状态
             action = next_action
-            pos = ne_pos
+            # pos = ne_pos
 
             if done:
-                # 对剩余的未完成窗口进行清算
+                # 对剩余的未完成窗口进行清算【充分利用数据】
                 while len(reward_queue) > 0:
                     G = compute_n_step_return(
                         reward_queue, gamma, len(reward_queue), q_table, state_queue[-1], action_queue[-1]
                     )
                     q_table[state_queue[0]][action_queue[0]] -= alpha * (
-                        q_table[state_queue[0]][action_queue[0]] - G
+                            q_table[state_queue[0]][action_queue[0]] - G
                     )
-
-                    # 更新策略矩阵
-                    # best_action = np.argmax(q_table[state_queue[0]])
-                    # policy_matrix[state_queue[0]] = epsilon / len(env.action_space)
-                    # policy_matrix[state_queue[0]][best_action] += 1 - epsilon
 
                     # 移除窗口最早的元素
                     reward_queue.pop(0)
@@ -114,8 +106,7 @@ def train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n):
             print(f"Episode {episode + 1}/{num_episode} completed.")
 
 
-
-def test_policy(env, policy_matrix):
+def test(env, policy_matrix):
     env.reset()
     for t in range(1000):
         env.render(animation_interval=0.5)
@@ -132,6 +123,15 @@ def test_policy(env, policy_matrix):
             break
 
 
+def std_matrix(X):
+    min_vals = np.min(X, axis=1, keepdims=True)
+    max_vals = np.max(X, axis=1, keepdims=True)
+
+    # 按行 Min-Max 归一化
+    X_norm = (X - min_vals) / (max_vals - min_vals + 1e-8)  # 避免除以0
+    return X_norm
+
+
 if __name__ == "__main__":
     env = GridWorld()
 
@@ -140,9 +140,10 @@ if __name__ == "__main__":
 
     # 训练 n-step SARSA
     train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n)
-    # 测试策略
-    test_policy(env, q_table)
 
-    env.add_policy(q_table)
+    # 测试
+    test(env, q_table)
+
+    env.add_policy(std_matrix(q_table))
     print(q_table)
     env.render(animation_interval=10)

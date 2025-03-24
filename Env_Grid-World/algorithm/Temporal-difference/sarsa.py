@@ -3,10 +3,10 @@ import sys
 import numpy as np
 
 sys.path.append("../..")
-from src.grid_world import GridWorld
+from env.grid_world import GridWorld
 
 gamma = 0.9
-num_episode = 1000
+num_episode = 2000
 alpha = 0.1
 epsilon = 0.1
 
@@ -30,7 +30,7 @@ def train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon):
         env.reset()
         pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
         action = epsilon_greedy(pos, q_table, epsilon, env.action_space)
-        for t in range(1000):
+        for t in range(100):
             next_state, reward, done, info = env.step(action)
 
             # get next state & action

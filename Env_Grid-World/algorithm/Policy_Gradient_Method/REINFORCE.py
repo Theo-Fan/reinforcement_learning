@@ -4,7 +4,7 @@ import torch
 
 
 sys.path.append("../..")
-from src.grid_world import GridWorld
+from env.grid_world import GridWorld
 
 import random
 import numpy as np
