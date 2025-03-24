@@ -11,9 +11,9 @@ alpha = 0.1
 epsilon = 0.1
 
 
-def init_random_deterministic_policy(num_states, num_actions):
-    policy = np.full((num_states, num_actions), 0.2)
-    return policy
+def init_random_qtable(num_states, num_actions):
+    matrix = np.full((num_states, num_actions), 0.2)
+    return matrix
 
 
 def epsilon_greedy(state, policy, epsilon, action_space):
@@ -32,6 +32,8 @@ def train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon):
         action = epsilon_greedy(pos, q_table, epsilon, env.action_space)
         for t in range(1000):
             next_state, reward, done, info = env.step(action)
+
+            # get next state & action
             ne_pos = next_state[1] * env.env_size[0] + next_state[0]
             next_action = epsilon_greedy(ne_pos, q_table, epsilon, env.action_space)
 
@@ -40,11 +42,6 @@ def train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon):
                     q_table[pos][env.action_space.index(action)] -
                     (reward + gamma * q_table[ne_pos][env.action_space.index(next_action)])
             )
-
-            # Update policy can implicitly do in epsilon_greedy function
-            # best_action = np.argmax(q_table[ne_pos])
-            # policy_matrix[ne_pos] = epsilon / (len(env.action_space) - 1)
-            # policy_matrix[ne_pos][best_action] += 1 - epsilon
 
             # update state & action
             action = next_action
@@ -60,7 +57,7 @@ def train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon):
 
 def test_policy(env, policy_matrix):
     env.reset()
-    for t in range(1000):
+    for t in range(15):
         env.render(animation_interval=0.5)
         state = env.agent_state
         pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
@@ -85,7 +82,7 @@ def std_matrix(X):
 if __name__ == "__main__":
     env = GridWorld()
 
-    q_table = init_random_deterministic_policy(env.num_states, len(env.action_space))
+    q_table = init_random_qtable(env.num_states, len(env.action_space))
 
     # train
     train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon)

@@ -12,7 +12,7 @@ alpha = 0.1
 epsilon = 0.1
 
 
-def init_random_deterministic_policy(num_states, num_actions):
+def init_random_qtable(num_states, num_actions):
     matrix = np.zeros((num_states, num_actions))
     for row in matrix:
         row[np.random.randint(0, num_actions)] = 1
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     env = GridWorld()
     num_state = env.num_states
     num_action = len(env.action_space)
-    q_table = init_random_deterministic_policy(
+    q_table = init_random_qtable(
         num_states=num_state,
         num_actions=num_action
     )

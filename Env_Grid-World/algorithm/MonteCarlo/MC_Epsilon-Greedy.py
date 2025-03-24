@@ -13,7 +13,7 @@ epsilon = 0.1
 
 def init_random_policy(num_states, num_actions):
     # full random policy
-    policy = np.full((num_states, num_actions), 0.2)
+    policy = np.full((num_states, num_actions), 0.2) # 为什么设置为大于1的值就无法训练出结果
     return policy
 
 

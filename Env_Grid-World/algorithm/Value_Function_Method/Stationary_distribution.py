@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 sys.path.append("../..")
 from src.grid_world import GridWorld  # 确保您已正确安装或导入该模块
 
-def init_random_deterministic_policy(num_states, num_actions):
+def init_random_qtable(num_states, num_actions):
     matrix = np.ones((num_states, num_actions)) / num_actions
     return matrix
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     n_ratio = [ [] for s in range(num_states)]
 
     q_table = np.zeros((num_states, num_actions))
-    policy_matrix = init_random_deterministic_policy(num_states, num_actions)
+    policy_matrix = init_random_qtable(num_states, num_actions)
 
 
 

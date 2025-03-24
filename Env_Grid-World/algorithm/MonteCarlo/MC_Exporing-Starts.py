@@ -10,7 +10,7 @@ from src.grid_world import GridWorld
 gamma = 0.9
 
 
-def init_random_policy(num_states, num_actions):
+def init_random_deterministic_policy(num_states, num_actions):
     policy = np.zeros((num_states, num_actions))
     for s in range(num_states):
         policy[s, np.random.choice(num_actions - 1)] = 1
@@ -21,7 +21,7 @@ def mc_exploring_starts(env, gamma, num_episodes=3000):
     num_states = env.num_states
     num_actions = len(env.action_space)
 
-    policy = init_random_policy(num_states, num_actions)  # init random policy
+    policy = init_random_deterministic_policy(num_states, num_actions)  # init random policy
     print("Init Optimal Policy:")
     print(policy)
 
