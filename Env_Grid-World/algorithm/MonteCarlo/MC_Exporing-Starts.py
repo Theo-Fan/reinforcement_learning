@@ -102,7 +102,7 @@ def evaluate(env, optimal_policy):
         if done:
             break
 
-    env.add_policy(optimal_policy)
+    env.add_policy(optimal_policy * 1.5)
     env.render(animation_interval=10)
 
 

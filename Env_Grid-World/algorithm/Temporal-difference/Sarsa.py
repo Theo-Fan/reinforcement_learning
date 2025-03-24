@@ -12,29 +12,28 @@ epsilon = 0.1
 
 
 def init_random_deterministic_policy(num_states, num_actions):
-    matrix = np.zeros((num_states, num_actions))
-    for row in matrix:
-        row[np.random.randint(0, num_actions)] = 1
-    return matrix
+    policy = np.full((num_states, num_actions), 0.2)
+    return policy
 
 
-def epsilon_greedy_policy(state, policy_matrix, epsilon, action_space):
-    if random.uniform(0, 1) < epsilon:
-        action = random.choice(action_space)  # 随机探索
-    else:
-        action = action_space[np.argmax(policy_matrix[state])]  # 选择最优动作
+def epsilon_greedy(state, policy, epsilon, action_space):
+    action_idx = np.argmax(policy[state])
+    if np.random.random() < epsilon:
+        tmp_action = [i for i in range(len(action_space)) if i != action_idx]
+        action_idx = np.random.choice(tmp_action)
+    action = action_space[action_idx]
     return action
 
 
-def train_sarsa(env, q_table, policy_matrix, num_episode, alpha, gamma, epsilon):
+def train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon):
     for episode in range(num_episode):
         env.reset()
         pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
-        action = epsilon_greedy_policy(pos, policy_matrix, epsilon, env.action_space)
+        action = epsilon_greedy(pos, q_table, epsilon, env.action_space)
         for t in range(1000):
             next_state, reward, done, info = env.step(action)
             ne_pos = next_state[1] * env.env_size[0] + next_state[0]
-            next_action = epsilon_greedy_policy(ne_pos, policy_matrix, epsilon, env.action_space)
+            next_action = epsilon_greedy(ne_pos, q_table, epsilon, env.action_space)
 
             # update q-value [policy improvement]
             q_table[pos][env.action_space.index(action)] -= alpha * (
@@ -42,11 +41,12 @@ def train_sarsa(env, q_table, policy_matrix, num_episode, alpha, gamma, epsilon)
                     (reward + gamma * q_table[ne_pos][env.action_space.index(next_action)])
             )
 
-            best_action = np.argmax(q_table[ne_pos])
-            policy_matrix[ne_pos] = epsilon / (len(env.action_space) - 1)
-            policy_matrix[ne_pos][best_action] += 1 - epsilon
+            # Update policy can implicitly do in epsilon_greedy function
+            # best_action = np.argmax(q_table[ne_pos])
+            # policy_matrix[ne_pos] = epsilon / (len(env.action_space) - 1)
+            # policy_matrix[ne_pos][best_action] += 1 - epsilon
 
-            # important
+            # update state & action
             action = next_action
             pos = ne_pos
 
@@ -56,7 +56,6 @@ def train_sarsa(env, q_table, policy_matrix, num_episode, alpha, gamma, epsilon)
         if (episode + 1) % 100 == 0:
             print(f"Episode {episode + 1}/{num_episode} completed.")
 
-    return policy_matrix
 
 
 def test_policy(env, policy_matrix):
@@ -75,18 +74,26 @@ def test_policy(env, policy_matrix):
             break
 
 
+def std_matrix(X):
+    min_vals = np.min(X, axis=1, keepdims=True)
+    max_vals = np.max(X, axis=1, keepdims=True)
+
+    # 按行 Min-Max 归一化
+    X_norm = (X - min_vals) / (max_vals - min_vals + 1e-8)  # 避免除以0
+    return X_norm
+
 if __name__ == "__main__":
     env = GridWorld()
 
-    q_table = np.zeros((env.num_states, len(env.action_space)))
-    policy_matrix = init_random_deterministic_policy(env.num_states, len(env.action_space))
+    q_table = init_random_deterministic_policy(env.num_states, len(env.action_space))
 
     # train
-    policy_matrix = train_sarsa(env, q_table, policy_matrix, num_episode, alpha, gamma, epsilon)
+    train_sarsa(env, q_table, num_episode, alpha, gamma, epsilon)
+
     # test
-    test_policy(env, policy_matrix)
+    test_policy(env, q_table)
 
-    print("Policy Matrix:", policy_matrix)
+    print("q-Table:", q_table)
 
-    env.add_policy(policy_matrix)
+    env.add_policy(std_matrix(q_table))
     env.render(animation_interval=10)
