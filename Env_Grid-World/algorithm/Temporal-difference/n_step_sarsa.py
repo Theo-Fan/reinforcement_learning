@@ -1,5 +1,6 @@
 import random
 import sys
+
 import numpy as np
 
 sys.path.append("../..")
@@ -131,19 +132,19 @@ def std_matrix(X):
     X_norm = (X - min_vals) / (max_vals - min_vals + 1e-8)  # 避免除以0
     return X_norm
 
-
-if __name__ == "__main__":
+def main():
     env = GridWorld()
 
-    # q_table = np.zeros((env.num_states, len(env.action_space)))
     q_table = init_random_qtable(env.num_states, len(env.action_space))
 
     # 训练 n-step SARSA
     train_n_step_sarsa(env, q_table, num_episode, alpha, gamma, epsilon, n)
 
-    # 测试
     test(env, q_table)
 
     env.add_policy(std_matrix(q_table))
     print(q_table)
     env.render(animation_interval=10)
+
+if __name__ == "__main__":
+    main()
