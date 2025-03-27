@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser("Grid World Environment")
 
 ## ==================== User settings ===================='''
 # specify the number of columns and rows of the grid world
+# parser.add_argument("--env-size", type=Union[list, tuple, np.ndarray], default=(2, 2))
 parser.add_argument("--env-size", type=Union[list, tuple, np.ndarray], default=(5, 5))
 # parser.add_argument("--env-size", type=Union[list, tuple, np.ndarray], default=(6, 6))
 
@@ -17,6 +18,7 @@ parser.add_argument("--env-size", type=Union[list, tuple, np.ndarray], default=(
 parser.add_argument("--start-state", type=Union[list, tuple, np.ndarray], default=(0, 0))
 
 # specify the target state
+# parser.add_argument("--target-state", type=Union[list, tuple, np.ndarray], default=(1, 1))
 parser.add_argument("--target-state", type=Union[list, tuple, np.ndarray], default=(2, 3))
 # parser.add_argument("--target-state", type=Union[list, tuple, np.ndarray], default=(3, 3))
 
@@ -24,7 +26,8 @@ parser.add_argument("--target-state", type=Union[list, tuple, np.ndarray], defau
 parser.add_argument(
     "--forbidden-states",
     type=list,
-    default=[(1, 1), (2, 1), (2, 2), (1, 3), (1, 4), (3, 3), (3, 1)]
+    # default=[(1, 0)]
+    default=[(1, 1), (2, 1), (2, 2), (1, 3), (1, 4), (3, 3), ]
     # default=[(0, 1), (1, 3), (2, 2), (3, 1), (3, 2), (4, 2), (4, 3), (1, 4), (4, 4)]
 )
 # parser.add_argument("--forbidden-states", type=list, default=[(1, 0)])

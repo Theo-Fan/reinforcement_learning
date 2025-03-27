@@ -129,6 +129,8 @@ class GridWorld():
             self.traj_obj, = self.ax.plot([], [], color=self.color_trajectory, linewidth=0.5)
 
         # self.agent_circle.center = (self.agent_state[0], self.agent_state[1])
+
+        # if show agent in circle
         self.agent_star.set_data([self.agent_state[0]], [self.agent_state[1]])
         traj_x, traj_y = zip(*self.traj)
         self.traj_obj.set_data(traj_x, traj_y)
