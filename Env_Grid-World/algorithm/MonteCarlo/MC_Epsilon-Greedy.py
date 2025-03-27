@@ -16,6 +16,14 @@ def init_random_policy(num_states, num_actions):
     policy = np.full((num_states, num_actions), 0.2) # 为什么设置为大于1的值就无法训练出结果
     return policy
 
+def epsilon_greedy(state, policy, epsilon, action_space):
+    action_idx = np.argmax(policy[state])
+    if np.random.uniform(0, 1) < epsilon:
+        tmp_action = [i for i in range(len(action_space)) if i != action_idx]
+        action_idx = np.random.choice(tmp_action)
+    action = action_space[action_idx]
+    return action
+
 
 def mc_exploring_starts(env, gamma, num_episodes=5000):
     num_states = env.num_states
@@ -44,11 +52,8 @@ def mc_exploring_starts(env, gamma, num_episodes=5000):
             episode_data.append((state, action, reward))  # store (state, action, reward)
             state = next_state[1] * env.env_size[0] + next_state[0]  # update state to next state
             # action = env.action_space[np.argmax(policy[state])]
-            action_idx = np.argmax(policy[state])
-            if np.random.random() < epsilon:
-                tmp_action = [i for i in range(num_actions) if i != action_idx]
-                action_idx = np.random.choice(tmp_action)
-            action = env.action_space[action_idx]
+            action = epsilon_greedy(state, policy, epsilon, env.action_space)
+
             if done: break
 
         # ==== Step 2: Policy Evaluation and Improvement ====

@@ -2,9 +2,11 @@ import sys
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
+"""
+    Before running this code, you need modify the arguments.py file to keep the same environment setting.
+"""
 sys.path.append("../..")
-from env.grid_world import GridWorld  # 确保您已正确安装或导入该模块
+from env.grid_world import GridWorld
 
 
 def init_random_qtable(num_states, num_actions):
@@ -14,7 +16,7 @@ def init_random_qtable(num_states, num_actions):
 
 def epsilon_greedy(state, policy, epsilon, action_space):
     action_idx = np.argmax(policy[state])
-    if np.random.random() < epsilon:
+    if np.random.uniform(0, 1) < epsilon:
         tmp_action = [i for i in range(len(action_space)) if i != action_idx]
         action_idx = np.random.choice(tmp_action)
     action = action_space[action_idx]
