@@ -64,7 +64,7 @@ def train(env, q_net):
     for episode in range(num_episode):
         env.reset()
 
-        for t in range(2000):
+        for t in range(4000):
 
             # state
             pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
@@ -81,11 +81,11 @@ def train(env, q_net):
             ne_state_vec = torch.zeros(num_state, )
             ne_state_vec[ne_pos] = 1.0
 
-            # next_action
-            ne_action, ne_action_idx = epsilon_greedy_network(ne_state_vec, q_net, env.action_space)
+            # next_action (For Sarsa, QLearning don't need)
+            # ne_action, ne_action_idx = epsilon_greedy_network(ne_state_vec, q_net, env.action_space)
 
             cur_q = q_net(state_vec.to(device))[action_idx]
-            next_q = q_net(ne_state_vec.to(device))[ne_action_idx]
+            next_q = torch.max(q_net(ne_state_vec.to(device)))  # different between Sarsa and QLearning
             TD_target = reward + gamma * next_q
 
             # ======>  we use the TD-error as the loss  <=======
