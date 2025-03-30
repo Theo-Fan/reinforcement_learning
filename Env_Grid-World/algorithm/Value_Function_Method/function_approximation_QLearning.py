@@ -15,7 +15,6 @@ import torch.nn as nn
 
 gamma = 0.9
 num_episode = 500
-alpha = 0.1
 epsilon = 0.1
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -24,14 +23,14 @@ device = torch.device("cpu")
 
 
 class QNetwork(nn.Module):
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim, action_dim, hidden_dim=128):
         super(QNetwork, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(state_dim, 128),
+            nn.Linear(state_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(128, 128),
+            nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(128, action_dim)
+            nn.Linear(hidden_dim, action_dim)
         )
 
     def forward(self, x):
@@ -103,7 +102,7 @@ def train(env, q_net):
             print(f"Episode: {episode}/{num_episode}, Loss: {loss.item()}")
 
 
-def test(env, q_net):
+def test(env, q_net): # TODO when test, epsilon need to set 0
     num_state = env.num_states
     num_action = len(env.action_space)
     env.reset()
