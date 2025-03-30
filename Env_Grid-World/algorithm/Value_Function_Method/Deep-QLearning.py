@@ -8,20 +8,10 @@ import torch
 import numpy as np
 import torch.nn as nn
 
-"""
-    In this script, we use a neural network to approximate the q-table.
-    We will clearly find: 
-        Compare with q-table, the neural network can't optimize all the states[Exist some state are not take best action]
-        In other words, the aim of function approximation is find a good path, not all the good path.
-"""
-
 gamma = 0.9
 num_episode = 500
 epsilon = 0.1
 target_update_freq = 10
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-device = torch.device("cpu")
 
 
 class ReplayBuffer:
@@ -104,7 +94,6 @@ def net_update(data, q_net, target_net, loss_fn, optimizer):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-
 
 
 def train(env, q_net, target_net):
