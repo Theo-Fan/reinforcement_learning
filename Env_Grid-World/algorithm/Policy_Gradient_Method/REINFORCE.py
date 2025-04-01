@@ -1,22 +1,20 @@
 import sys
 
-import torch
-
 sys.path.append("../..")
 from env.grid_world import GridWorld
 
-import random
+import torch
 import numpy as np
 from torch import nn
 
+num_episodes = 1000
+max_steps = 100
 gamma = 0.95
 lr = 5e-4
-num_episodes = 1000
-max_steps_per_episode = 100
 
 
 class PolicyNetwork(nn.Module):
-    def __init__(self, state_dim, hidden_dim, action_dim):
+    def __init__(self, state_dim, action_dim, hidden_dim=128):
         super(PolicyNetwork, self).__init__()
         self.model = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
@@ -43,7 +41,7 @@ def train(env, net):
         env.reset()
         episode = []
 
-        for _ in range(max_steps_per_episode):
+        for _ in range(max_steps):
             pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
 
             state_tensor = change_state(pos)
@@ -81,20 +79,19 @@ def test(env, net):
 
         policy_matrix = torch.zeros((num_state, num_action))
         for i in range(num_state):
-            state_vec = torch.zeros(num_state, )
-            state_vec[i] = 1.0
+            state_vec = change_state(i)
             best_action = torch.argmax(net(state_vec))
             policy_matrix[i][best_action] = 1.0
 
         for t in range(1000):
-            env.render(animation_interval=0.5)  # 渲染环境
+            env.render(animation_interval=0.5)
 
             pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
             state_tensor = change_state(pos)
 
             action_probs = net(state_tensor).detach().numpy()
 
-            action = np.random.choice(len(action_probs), p=np.array(action_probs))  # 按照概率分布采样动作
+            action = np.random.choice(len(action_probs), p=np.array(action_probs))  # choose action by probability
 
             next_state, reward, done, _ = env.step(env.action_space[action])
             print(
@@ -111,9 +108,8 @@ def main():
 
     state_dim = env.num_states
     action_dim = len(env.action_space)
-    hidden_dim = 128
 
-    net = PolicyNetwork(state_dim, hidden_dim, action_dim)
+    net = PolicyNetwork(state_dim, action_dim)
 
     train(env, net)
 
