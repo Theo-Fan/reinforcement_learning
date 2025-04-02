@@ -154,7 +154,8 @@ if __name__ == "__main__":
 
             state = next_state  # 更新状态
 
-        print(f"Episode: {i}, Total Return: {episode_return}.")
+        if (i + 1) % 100 == 0:
+            print(f"Episode: {i + 1}, Total Return: {episode_return}.")
 
     env.close()  # 关闭环境
 

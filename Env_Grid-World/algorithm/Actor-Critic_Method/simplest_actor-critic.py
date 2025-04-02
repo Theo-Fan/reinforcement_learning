@@ -58,31 +58,64 @@ def change_action(action, num_actions=5):
     return action_vec
 
 
+def net_update(transition_dict, policy_net, critic_net, policy_optimizer, critic_optimizer, critic_loss):
+    state_vec = torch.stack(transition_dict['states'])
+    action_vec = torch.stack(transition_dict['actions'])
+    ne_state_vec = torch.stack(transition_dict['next_states'])
+    ne_action_vec = torch.stack(transition_dict['next_actions'])
+    reward = torch.tensor(transition_dict['rewards'], dtype=torch.float32).view(-1, 1)
+    done = torch.tensor(transition_dict['dones'], dtype=torch.float).view(-1, 1)
+    action_probs = torch.stack(transition_dict['action_probs'])
+    action_idx = torch.tensor(transition_dict['action_idxs'], dtype=torch.long).view(-1, 1)
+
+    # print(type(action_vec))
+    # sys.exit()
+
+    # critic action
+    q_val = critic_net(state_vec, action_vec)
+    ne_q_val = critic_net(ne_state_vec, ne_action_vec)
+
+    # TD target & error
+    TD_target = reward + gamma * ne_q_val * (1 - done)
+    TD_error = TD_target - q_val
+
+    # Value update(Critic Update)
+    value_loss = torch.mean(critic_loss(q_val, TD_target.detach()))
+
+    # Policy update(Actor Update)
+    policy_loss = torch.mean(-torch.log(action_probs.gather(1, action_idx)) * q_val.detach())
+    policy_optimizer.zero_grad()
+    critic_optimizer.zero_grad()
+    policy_loss.backward()
+    value_loss.backward()
+    policy_optimizer.step()
+    critic_optimizer.step()
+
+
 def train(env, policy_net, critic_net):
     policy_optimizer = Adam(policy_net.parameters(), lr=lr)
-
     critic_optimizer = Adam(critic_net.parameters(), lr=lr)
-
     critic_loss = nn.MSELoss()
 
     for episode in range(num_episodes):
         env.reset()
 
+        transition_dict = {'states': [], 'actions': [], 'next_states': [],
+                           'next_actions': [], 'rewards': [], 'dones': [],
+                           'action_idxs': [], 'action_probs': []}
+
+        episode_return = 0
         for step in range(max_steps):
             # state
             pos = env.agent_state[1] * env.env_size[0] + env.agent_state[0]
             state_vec = change_state(pos)
 
-            # get action probabilities
-            action_probs = policy_net(state_vec)
-
             # sampling action
+            action_probs = policy_net(state_vec)
             action_dist = torch.distributions.Categorical(action_probs)
             action_idx = action_dist.sample()
 
             # print(f"Action Probs: {action_probs} Action: {action_idx}")
-
-            # sys.exit()
 
             ne_state, reward, done, info = env.step(env.action_space[action_idx])
 
@@ -99,28 +132,23 @@ def train(env, policy_net, critic_net):
             action_vec = change_action(action_idx.item())
             ne_action_vec = change_action(ne_action_idx.item())
 
-            # critic action
-            q_val = critic_net(state_vec, action_vec)
-            ne_q_val = critic_net(ne_state_vec, ne_action_vec)
+            # store transition
+            transition_dict['states'].append(state_vec)
+            transition_dict['actions'].append(action_vec)
+            transition_dict['next_states'].append(ne_state_vec)
+            transition_dict['next_actions'].append(ne_action_vec)
+            transition_dict['rewards'].append(reward)
+            transition_dict['dones'].append(done)
+            transition_dict['action_idxs'].append(action_idx.item())
+            transition_dict['action_probs'].append(action_probs)
 
-            # TD target & error
-            TD_target = reward + gamma * ne_q_val * (1 - done)
-            TD_error = TD_target - q_val
-
-            # Policy update(Actor Update)
-            policy_loss = -torch.log(action_probs[action_idx]) * TD_error.detach()
-            policy_optimizer.zero_grad()
-            policy_loss.backward()
-            policy_optimizer.step()
-
-            # Value update(Critic Update)
-            value_loss = critic_loss(q_val, TD_target.detach())
-            critic_optimizer.zero_grad()
-            value_loss.backward()
-            critic_optimizer.step()
+            episode_return += reward
 
             if done:
                 break
+
+        net_update(transition_dict, policy_net, critic_net, policy_optimizer, critic_optimizer, critic_loss)
+
         if episode % 100 == 0:
             print(f"Episode {episode}/{num_episodes} completed.")
 
