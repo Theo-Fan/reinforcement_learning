@@ -1,3 +1,9 @@
+"""
+    BUG:
+        This script only provide the sructure of actor-critic algorithm.
+        but could not trainning successfully. (maybe is the problem of the environment)
+"""
+
 import sys
 
 sys.path.append("../..")
@@ -79,10 +85,6 @@ def train(env, policy_net, critic_net):
             # sampling action
             action_dist = torch.distributions.Categorical(action_probs)
             action_idx = action_dist.sample()
-
-            # print(f"Action Probs: {action_probs} Action: {action_idx}")
-
-            # sys.exit()
 
             ne_state, reward, done, info = env.step(env.action_space[action_idx])
 
