@@ -23,16 +23,6 @@ max_steps = 300
 epsilon = 0.1
 gamma = 0.95
 
-# [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)]  # 下， 右， 上， 左， 原地
-
-ref = {
-    0: "down",
-    1: "right",
-    2: "up",
-    3: "left",
-    4: "nothing"
-}
-
 
 class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, hidden_dim=128):
@@ -163,10 +153,10 @@ def main():
 
     critic_net = Critic(num_state, num_action, hidden_dim=64)
 
-    train(env, actor_net, critic_net)  # TODO
+    train(env, actor_net, critic_net)
 
     # sys.exit()
-    policy_matrix = test(env, actor_net)  # TODO
+    policy_matrix = test(env, actor_net)
 
     # Render the environment
     print(f"Policy Matrix: \n{policy_matrix}")

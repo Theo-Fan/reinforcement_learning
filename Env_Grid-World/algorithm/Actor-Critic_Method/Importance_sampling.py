@@ -55,7 +55,7 @@ plt.plot(avg_vals, color='#2C64B0', linestyle=':', linewidth=2, label="average")
 # importance sampling
 plt.plot(importance_vals, color='#B8CE90', linestyle='-', linewidth=1.5, label="importance sampling")
 
-# 辅助线 
+# horizontal lines
 plt.axhline(y=1, color='black', linewidth=0.3, alpha=0.2)
 plt.axhline(y=0, color='black', linewidth=0.3, alpha=0.2)
 plt.axhline(y=-1, color='black', linewidth=0.3, alpha=0.2)
