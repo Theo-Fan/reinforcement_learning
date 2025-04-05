@@ -14,7 +14,7 @@ import torch.nn as nn
 """
 
 gamma = 0.9
-num_episode = 500
+num_episode = 1000
 epsilon = 0.1
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
