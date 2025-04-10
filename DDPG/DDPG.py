@@ -1,3 +1,10 @@
+"""
+    Problem:
+        This algorithm (DDPG) can work on Pendulum environment.
+        But can not work on the MountainCarContinue environment.
+        Maybe the problem lies in reward structure of environment.
+"""
+
 import time
 from collections import deque
 
@@ -9,11 +16,11 @@ import gymnasium as gym
 
 import torch.nn.functional as F
 
-env_name = 'MountainCarContinuous-v0'
+env_name = 'Pendulum-v1'
 
-actor_lr = 1e-3
-critic_lr = 1e-3
-hidden_dim = 128
+actor_lr = 3e-4
+critic_lr = 3e-3
+hidden_dim = 64
 
 gamma = 0.98
 tau = 0.005  # use for soft update
@@ -21,7 +28,7 @@ sigma = 0.01  # noise
 
 buffer_size = 10000
 batch_size = 64
-mini_size = 512
+mini_size = 1024
 
 
 class Actor(nn.Module):
@@ -31,8 +38,8 @@ class Actor(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
+            # nn.Linear(hidden_dim, hidden_dim),
+            # nn.ReLU(),
             nn.Linear(hidden_dim, action_dim),
             nn.Tanh()
         )
@@ -103,13 +110,9 @@ class DDPG:
 
     def take_action(self, state, noise=True):
         # 保证 state 有 batch 维度
-        state_tensor = torch.tensor(state, dtype=torch.float).unsqueeze(0)
-        action = self.actor(state_tensor).detach().cpu().numpy()[0]  # 取得第一维输出
-        if noise:
-            noise_val = sigma * np.random.randn(self.action_dim)
-            action += noise_val
-        # 可选：裁剪动作到合法范围
-        action = np.clip(action, -self.action_bound, self.action_bound)
+        state_tensor = torch.tensor([state], dtype=torch.float).unsqueeze(0)
+        action = self.actor(state_tensor).item()  # 取得第一维输出
+        action = action + sigma * np.random.randn(self.action_dim)
         return action
 
     def soft_update(self, net, target_net):
@@ -177,14 +180,18 @@ def main():
 
     env = gym.make(env_name, render_mode='human')
     state = env.reset()[0]
+    episode_reward = 0
     done = False
     while not done:
         action = agent.take_action(state, noise=False)
         next_state, reward, terminated, truncated, _ = env.step(action)
         done = terminated or truncated
         state = next_state
-        print(' Test ---- action, reward, obs, done: ', action, reward, state, done)
+        episode_reward += reward
+        print(' Test ---- reward, done: ', reward, done)
         time.sleep(0.05)
+
+    print(f"Test Episode Reward: {episode_reward}")
 
 
 if __name__ == '__main__':
