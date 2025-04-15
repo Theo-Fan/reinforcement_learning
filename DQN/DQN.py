@@ -103,6 +103,8 @@ class DQNAgent:
 
 def main():
     env = gym.make('CartPole-v1')
+
+    # env.step()
     agent = DQNAgent(env)
 
     episode = 2000

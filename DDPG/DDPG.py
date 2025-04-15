@@ -112,7 +112,7 @@ class DDPG:
         # 保证 state 有 batch 维度
         state_tensor = torch.tensor([state], dtype=torch.float).unsqueeze(0)
         action = self.actor(state_tensor).item()  # 取得第一维输出
-        action = action + sigma * np.random.randn(self.action_dim)
+        action = action + sigma * np.random.randn(self.action_dim) # 加入 noise 后，behavior policy != target policy
         return action
 
     def soft_update(self, net, target_net):
