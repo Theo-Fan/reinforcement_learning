@@ -54,7 +54,7 @@ class DQNAgent:
     def __init__(self, env):
         self.env = env
         self.state_dim = self.env.observation_space.shape[0]
-        self.action_dim = int(findall(r"\d+\.?\d*", str(self.env.action_space))[0])  # 获取动作维度
+        self.action_dim = self.env.action_space.n  # 获取动作维度
 
         self.hidden_dim = 128
         self.gamma = 0.98
@@ -103,11 +103,9 @@ class DQNAgent:
 
 def main():
     env = gym.make('CartPole-v1')
-
-    # env.step()
     agent = DQNAgent(env)
 
-    episode = 2000
+    episode = 500
     max_steps = 1000
 
     # train

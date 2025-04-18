@@ -4,25 +4,24 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-# 创建环境
+
 env = gym.make('CliffWalking-v0')
 state_dim = env.observation_space.n  # 状态数量 48
 action_dim = env.action_space.n      # 动作数量 4
 
-# 超参数
+
 lr = 1e-3
 gamma = 0.99
 hidden_size = 128
 entropy_coef = 0.01
 num_episodes = 2000
 
-# 状态 one-hot 编码
+
 def one_hot(state, dim):
     vec = torch.zeros(dim)
     vec[state] = 1.0
     return vec.unsqueeze(0)  # shape: [1, state_dim]
 
-# 定义Actor-Critic网络
 class ActorCritic(nn.Module):
     def __init__(self):
         super(ActorCritic, self).__init__()

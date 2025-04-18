@@ -50,7 +50,6 @@ class Critic(nn.Module):
 def train(env, actor, critic):
     # hyperparameters
     num_episodes = 1500
-    max_steps = 500
     gamma = 0.98
     lr = 1e-3
     actor_optimizer = torch.optim.Adam(actor.parameters(), lr=lr)
@@ -107,9 +106,8 @@ def train(env, actor, critic):
         TD_target = rewards + gamma * ne_vals * (1 - dones)
         TD_error = TD_target.detach() - vals.detach()
 
-        # 使用q-val效果很差，使用TD error, return效果好
+        # The q-val unefficiently，using TD error, return are better
         actor_loss = (-log_probs * advantage).mean()
-
 
         critic_loss = F.mse_loss(vals, TD_target)
 
@@ -126,7 +124,7 @@ def train(env, actor, critic):
 
 
 def test(actor):
-    env = gym.make('CartPole-v1', render_mode="human")  # 打开渲染窗口
+    env = gym.make('CartPole-v1', render_mode="human")
     state, _ = env.reset()
     done = False
     total_reward = 0
