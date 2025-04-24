@@ -1,4 +1,4 @@
-## Code about Reinforce Learning
+## Code about Reinforcement Learning
 
 ### Algorithm List
 - Monte Carlo Algorithm
@@ -7,6 +7,7 @@
 - DQN
 - Policy Gradient
 - Actor-Critic
+- DDPG
 - PPO
 
 

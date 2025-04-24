@@ -157,7 +157,7 @@ def main():
 
     agent = DDPG(state_dim, action_dim, action_bound)
 
-    num_episodes = 500
+    num_episodes = 350
 
     for episode in range(num_episodes):
         state = env.reset()[0]
