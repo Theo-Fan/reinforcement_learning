@@ -60,7 +60,7 @@ if __name__ == "__main__":
     num_episodes = 1000
     hidden_dim = 128
     gamma = 0.98  # 折扣因子
-    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     # 初始化环境
     env = gym.make("CartPole-v1")
