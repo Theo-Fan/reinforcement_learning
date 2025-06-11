@@ -46,7 +46,7 @@ def main():
     # num_states: 25 # 从左到右，从上到下增大
 
     v = np.zeros(env.num_states)
-    q_tabel = np.zeros((env.num_states, len(env.action_space)))
+    q_table = np.zeros((env.num_states, len(env.action_space)))
     policy_matrix = init_random_determinatal_policy(env.num_states, len(env.action_space))
 
 
@@ -74,10 +74,10 @@ def main():
                 init_state = env.set_state((s % env.env_size[1], s // env.env_size[1]))
                 next_state, reward, done, info = env.step(a)
                 n_s = next_state[1] * env.env_size[0] + next_state[0]
-                q_tabel[s, idx] = reward + gamma * v[n_s]
+                q_table[s, idx] = reward + gamma * v[n_s]
 
-            max_action_index = np.argmax(q_tabel[s])
-            max_action_value = np.max(q_tabel[s])
+            max_action_index = np.argmax(q_table[s])
+            max_action_value = np.max(q_table[s])
 
             policy_matrix[s] = np.zeros(len(env.action_space))
             policy_matrix[s, max_action_index] = 1

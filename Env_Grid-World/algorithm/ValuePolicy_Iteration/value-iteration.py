@@ -34,7 +34,7 @@ def main():
     # action_space: [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] down, right, up, left, stay
     # num_states: 25
     v = np.zeros(env.num_states)
-    q_tabel = np.zeros((env.num_states, len(env.action_space)))
+    q_table = np.zeros((env.num_states, len(env.action_space)))
     policy_matrix = np.zeros((env.num_states, len(env.action_space)))
 
     for t in range(1000):
@@ -44,11 +44,11 @@ def main():
                 init_state = env.set_state((s % env.env_size[1], s // env.env_size[1]))  # up -> down, left -> right
                 next_state, reward, done, info = env.step(a)
                 n_s = next_state[1] * env.env_size[0] + next_state[0]  # up -> down, left -> right
-                q_tabel[s, idx] = reward + gamma * v[n_s]
+                q_table[s, idx] = reward + gamma * v[n_s]
 
             # get max action
-            max_action_index = np.argmax(q_tabel[s])
-            max_action_value = np.max(q_tabel[s])
+            max_action_index = np.argmax(q_table[s])
+            max_action_value = np.max(q_table[s])
 
             # policy update
             policy_matrix[s] = np.zeros(len(env.action_space))
