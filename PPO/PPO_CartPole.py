@@ -1,3 +1,5 @@
+import time
+
 import gymnasium as gym
 import numpy as np
 import torch
@@ -122,6 +124,7 @@ def train(env, num_episodes, ppo_agent):
         transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'dones': []}
 
         done = False
+        start = time.time()
         while not done:
             action, probs = ppo_agent.take_action(state)  # TODO
 
@@ -136,6 +139,8 @@ def train(env, num_episodes, ppo_agent):
 
             episode_reward += reward
             state = next_state
+        end = time.time()
+        print(f"rollout time: {end - start:.2f} seconds")
 
         ppo_agent.learn(transition_dict)
         if episode % 10 == 0:
