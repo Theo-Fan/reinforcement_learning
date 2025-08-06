@@ -1,7 +1,6 @@
 import collections
 import random
 import time
-from re import findall
 
 import numpy as np
 import torch
@@ -90,7 +89,7 @@ class DQNAgent:
 
         # calculate q value
         q_val = self.q_net(state).gather(dim=1, index=action)  # get q value of action
-        ne_q_val = self.target_net(next_state).max(dim=1)[0].view(-1, 1)  # for mext_state, get max q value
+        ne_q_val = self.target_net(next_state).max(dim=1)[0].view(-1, 1)  # for next_state, get max q value
         TD_target = reward + (1 - done) * self.gamma * ne_q_val
 
         # calculate loss
